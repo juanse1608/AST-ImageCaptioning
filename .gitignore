@@ -129,5 +129,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 Data/Images/*
+Data/TrainCheckpoints/*
 Data/Captions/*
 *.DS_Store

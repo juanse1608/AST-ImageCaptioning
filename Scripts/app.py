@@ -1,7 +1,7 @@
+# Import libreries
 import streamlit as st
 from predictions_type_0 import show_predict_page, evaluate
-
-import SessionState
+import session_state
 
 
 

@@ -183,5 +183,5 @@ def evaluate(image):
 
 def show_predict_page():
     st.title('Machine Learning Web App - Image Captioning')
-    st.write('''### Give Some Info''')
+    st.write('''The main idea''')
 

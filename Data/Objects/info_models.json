@@ -1,0 +1,6 @@
+{
+    "TYPE_0": {
+        "DESCRIPTION": "CNN ENCODER: INCEPTION V3 - RNN DECODER: BAHDANAU ATENTION",
+        "FEEDBACK_FOLDER": "Data/Feedback/"
+    }
+}

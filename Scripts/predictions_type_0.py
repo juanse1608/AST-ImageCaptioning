@@ -7,6 +7,7 @@ import pickle
 import os
 
 ### Atributes 
+
 # Parameters
 with open('Data/Objects/parameters.json') as json_file:
     parameters = json.load(json_file)
@@ -32,17 +33,15 @@ class CNN_Encoder(tf.keras.Model):
         x = self.fc(x)
         x = tf.nn.relu(x)
         return x
-        
+
+# The RNN Decoder        
 class RNN_Decoder(tf.keras.Model):
     def __init__(self, embedding_dim, units, vocab_size):
         super(RNN_Decoder, self).__init__()
         self.units = units
 
         self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
-        self.gru = tf.keras.layers.GRU(self.units,
-                                       return_sequences=True,
-                                       return_state=True,
-                                       recurrent_initializer='glorot_uniform')
+        self.gru = tf.keras.layers.GRU(self.units, return_sequences=True, return_state=True, recurrent_initializer='glorot_uniform')
         self.fc1 = tf.keras.layers.Dense(self.units)
         self.fc2 = tf.keras.layers.Dense(vocab_size)
 
@@ -75,6 +74,7 @@ class RNN_Decoder(tf.keras.Model):
     def reset_state(self, batch_size):
         return tf.zeros((batch_size, self.units))
 
+# The BahdanauAttention Class
 class BahdanauAttention(tf.keras.Model):
     def __init__(self, units):
         super(BahdanauAttention, self).__init__()
@@ -90,8 +90,7 @@ class BahdanauAttention(tf.keras.Model):
         hidden_with_time_axis = tf.expand_dims(hidden, 1)
 
         # attention_hidden_layer shape == (batch_size, 64, units)
-        attention_hidden_layer = (tf.nn.tanh(self.W1(features) +
-                                             self.W2(hidden_with_time_axis)))
+        attention_hidden_layer = (tf.nn.tanh(self.W1(features) + self.W2(hidden_with_time_axis)))
 
         # score shape == (batch_size, 64, 1)
         # This gives you an unnormalized score for each image feature.
@@ -146,42 +145,35 @@ def image_to_v3_format(image_path):
     return img, image_path
 
 ### Predictions
+#@st.cache # Not working
 def evaluate(image):
     attention_plot = np.zeros((max_length, attention_features_shape))
 
     hidden = decoder.reset_state(batch_size=1)
-
+    
     temp_input = tf.expand_dims(image_to_v3_format(image)[0], 0)
     img_tensor_val = image_features_extract_model(temp_input)
-    img_tensor_val = tf.reshape(img_tensor_val, (img_tensor_val.shape[0],
-                                                 -1,
-                                                 img_tensor_val.shape[3]))
+    
+    img_tensor_val = tf.reshape(img_tensor_val, (img_tensor_val.shape[0], -1, img_tensor_val.shape[3]))
 
     features = encoder(img_tensor_val)
-
+    
     dec_input = tf.expand_dims([tokenizer.word_index['<start>']], 0)
     result = []
-
+    
     for i in range(max_length):
-        predictions, hidden, attention_weights = decoder(dec_input,
-                                                         features,
-                                                         hidden)
-
+        predictions, hidden, attention_weights = decoder(dec_input, features, hidden)
         attention_plot[i] = tf.reshape(attention_weights, (-1, )).numpy()
 
+        #tf.random.set_seed(5000)
         predicted_id = tf.random.categorical(predictions, 1)[0][0].numpy()
         result.append(tokenizer.index_word[predicted_id])
 
         if tokenizer.index_word[predicted_id] == '<end>':
-            return  ' '.join(result), attention_plot
+            return  ' '.join(result[:-1]), attention_plot
 
         dec_input = tf.expand_dims([predicted_id], 0)
 
     attention_plot = attention_plot[:len(result), :]
     return result, attention_plot
-
-
-def show_predict_page():
-    st.title('Machine Learning Web App - Image Captioning')
-    st.write('''The main idea''')
 

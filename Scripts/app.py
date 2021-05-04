@@ -1,18 +1,19 @@
 # Import libreries
 import streamlit as st
-from predictions_type_0 import show_predict_page, evaluate
+from predictions_type_0 import evaluate
 import session_state
-
-
+import json
 
 # Run the predict page
-show_predict_page()
+st.title('Machine Learning Web App - Image Captioning')
+st.header("Final Project - Advanced Statistics Topics: ML and DS")
+st.write('''Upload a photo and see the predicted caption for it''')
 
 # File uploader allows user to add their own image
 uploaded_file = st.file_uploader(label="Upload Image", type=["png", "jpeg", "jpg"])
 # Setup session state to remember state of app so refresh isn't always needed
 # See: https://discuss.streamlit.io/t/the-button-inside-a-button-seems-to-reset-the-whole-app-why/1051/11 
-session_state = SessionState.get(pred_button=False)
+session_state = session_state.get(pred_button=False)
 
 # Create logic for app flow
 if not uploaded_file:
@@ -35,12 +36,12 @@ if session_state.pred_button:
     # Create feedback mechanism (building a data flywheel)
     session_state.feedback = st.selectbox(
         "Is this correct?",
-        ("Select an option", "Yes", "No"))
+        ("Select and option", "Yes", "Kinda", "No"), )
     if session_state.feedback == "Select an option":
         pass
     elif session_state.feedback == "Yes":
         st.write("Thank you for your feedback!")
-        # Log prediction information to terminal (this could be stored in Big Query or something...)
+        # Log prediction information to terminal (this could be stored in Big Query or something like that)
         # print(update_logger(image=session_state.image,
         #                    model_used=MODEL,
         #                    pred_class=session_state.pred_class,
@@ -50,7 +51,18 @@ if session_state.pred_button:
         session_state.correct_class = st.text_input("What should the correct caption be?")
         if session_state.correct_class:
             st.write("Thank you for that, we'll use your help to make our model better!")
-            # Log prediction information to terminal (this could be stored in Big Query or something...)
+            # Log prediction information to terminal (this could be stored in Big Query or something like that)
+            #print(update_logger(image=session_state.image,
+            #                    model_used=MODEL,
+            #                    pred_class=session_state.pred_class,
+            #                    pred_conf=session_state.pred_conf,
+            #                    correct=False,
+            #                    user_label=session_state.correct_class))
+    elif session_state.feedback == "Kinda":
+        session_state.correct_class = st.text_input("What should a better caption be?")
+        if session_state.correct_class:
+            st.write("Thank you for that, we'll use your help to make our model better!")
+            # Log prediction information to terminal (this could be stored in Big Query or something like that)
             #print(update_logger(image=session_state.image,
             #                    model_used=MODEL,
             #                    pred_class=session_state.pred_class,

@@ -164,9 +164,13 @@ def evaluate(image):
     for i in range(max_length):
         predictions, hidden, attention_weights = decoder(dec_input, features, hidden)
         attention_plot[i] = tf.reshape(attention_weights, (-1, )).numpy()
+        
+        # Deterministic  
+        predicted_id = np.argmax(predictions)
 
-        #tf.random.set_seed(5000)
-        predicted_id = tf.random.categorical(predictions, 1)[0][0].numpy()
+        # Random (via probabilities)
+        #predicted_id = tf.random.categorical(predictions, 1)[0][0].numpy()
+        
         result.append(tokenizer.index_word[predicted_id])
 
         if tokenizer.index_word[predicted_id] == '<end>':

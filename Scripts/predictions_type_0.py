@@ -1,3 +1,6 @@
+##### Caption Prediction for Images
+
+### Libraries
 import streamlit as st
 import tensorflow as tf
 import numpy as np
@@ -145,7 +148,8 @@ def image_to_v3_format(image_path):
     return img, image_path
 
 ### Predictions
-#@st.cache # Not working
+#@
+#st.cache # Not working
 def evaluate(image):
     attention_plot = np.zeros((max_length, attention_features_shape))
 
@@ -165,12 +169,41 @@ def evaluate(image):
         predictions, hidden, attention_weights = decoder(dec_input, features, hidden)
         attention_plot[i] = tf.reshape(attention_weights, (-1, )).numpy()
         
-        # Deterministic  
+        # Deterministic prediction (via argmax)
         predicted_id = np.argmax(predictions)
 
-        # Random (via probabilities)
-        #predicted_id = tf.random.categorical(predictions, 1)[0][0].numpy()
-        
+        result.append(tokenizer.index_word[predicted_id])
+
+        if tokenizer.index_word[predicted_id] == '<end>':
+            return  ' '.join(result[:-1]), attention_plot
+
+        dec_input = tf.expand_dims([predicted_id], 0)
+
+    attention_plot = attention_plot[:len(result), :]
+    return result, attention_plot
+
+def prob_evaluate(image):
+    attention_plot = np.zeros((max_length, attention_features_shape))
+
+    hidden = decoder.reset_state(batch_size=1)
+    
+    temp_input = tf.expand_dims(image_to_v3_format(image)[0], 0)
+    img_tensor_val = image_features_extract_model(temp_input)
+    
+    img_tensor_val = tf.reshape(img_tensor_val, (img_tensor_val.shape[0], -1, img_tensor_val.shape[3]))
+
+    features = encoder(img_tensor_val)
+    
+    dec_input = tf.expand_dims([tokenizer.word_index['<start>']], 0)
+    result = []
+    
+    for i in range(max_length):
+        predictions, hidden, attention_weights = decoder(dec_input, features, hidden)
+        attention_plot[i] = tf.reshape(attention_weights, (-1, )).numpy()
+
+        # Random prediction (via probabilities)
+        predicted_id = tf.random.categorical(predictions, 1)[0][0].numpy()
+
         result.append(tokenizer.index_word[predicted_id])
 
         if tokenizer.index_word[predicted_id] == '<end>':

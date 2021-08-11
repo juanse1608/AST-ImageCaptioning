@@ -1,7 +1,7 @@
-PIL                 7.2.0
-pandas              1.2.0
-session_info        1.0.0
-streamlit           0.81.0
-keras_preprocessing 1.1.2
-numpy               1.19.5
-tensorflow          2.4.1
+PIL==7.2.0
+pandas==1.2.0
+session_info==1.0.0
+streamlit==0.81.0
+keras_preprocessing==1.1.2
+numpy==1.19.5
+tensorflow==2.4.1

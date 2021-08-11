@@ -9,9 +9,13 @@ import PIL.Image as Image
 import io
 import os 
 
+# Feedback type
+cloud_feedback = False
+
 # Run the predict page
 st.title('Machine Learning Web App - Image Captioning')
 st.header("Final Project - Advanced Statistics Topics: ML and DS")
+st.header("Click [here](https://github.com/juanse1608/AST-ImageCaptioning/blob/main/README.md) to know more about the project!")
 st.write('''Upload a photo and see the predicted caption for it''')
 
 # File uploader allows user to add their own image
@@ -45,29 +49,12 @@ if value == 'Argmax':
         st.write(f"The prediction via argmax probability for this caption is: __{val}.__")
     # Create feedback mechanism (building a data flywheel)
     session_state.feedback = st.selectbox("Is this correct?", ("Select and option", "Yes", "No"))
-    if session_state.feedback == "Select an option":
+    if cloud_feedback:
         pass
-    elif session_state.feedback == "Yes":
-        try: 
-            files = os.listdir(os.getcwd() + '/Data/Feedback/Images/')
-            files = [f for f in files if not f.startswith('.')]
-            files = [int(f.split('.')[0]) for f in files]
-            new_file = str(max(files)+1) + '.jpg'
-        except:
-            new_file = '0.jpg'
-        img = Image.open(io.BytesIO(session_state.uploaded_image))
-        img.save(f'Data/Feedback/Images/{new_file}')
-        new_caption = pd.DataFrame({'PATH': [new_file], 'CAPTION': val})
-        try:
-            caps = pd.read_csv('Data/Feedback/Captions/captions.csv')
-            caps = pd.concat([caps, new_caption], axis=0).reset_index(drop=True)
-            caps.to_csv('Data/Feedback/Captions/captions.csv', index=False)
-        except:
-            new_caption.to_csv('Data/Feedback/Captions/captions.csv', index=False)
-        st.write("Thank you for your feedback!")
-    elif session_state.feedback == "No":
-        session_state.correct_class = st.text_input("What should the correct caption be?")
-        if session_state.correct_class:
+    else:
+        if session_state.feedback == "Select an option":
+            pass
+        elif session_state.feedback == "Yes":
             try: 
                 files = os.listdir(os.getcwd() + '/Data/Feedback/Images/')
                 files = [f for f in files if not f.startswith('.')]
@@ -77,15 +64,35 @@ if value == 'Argmax':
                 new_file = '0.jpg'
             img = Image.open(io.BytesIO(session_state.uploaded_image))
             img.save(f'Data/Feedback/Images/{new_file}')
-            new_caption = pd.DataFrame({'PATH': [new_file], 'CAPTION': session_state.correct_class})
+            new_caption = pd.DataFrame({'PATH': [new_file], 'CAPTION': val})
             try:
                 caps = pd.read_csv('Data/Feedback/Captions/captions.csv')
                 caps = pd.concat([caps, new_caption], axis=0).reset_index(drop=True)
                 caps.to_csv('Data/Feedback/Captions/captions.csv', index=False)
             except:
                 new_caption.to_csv('Data/Feedback/Captions/captions.csv', index=False)
-            st.write("Thank you for that, we'll use your help to make our model better!")
-            # Log prediction information to terminal (this could be stored in Big Query or something like that)
+            st.write("Thank you for your feedback!")
+        elif session_state.feedback == "No":
+            session_state.correct_class = st.text_input("What should the correct caption be?")
+            if session_state.correct_class:
+                try: 
+                    files = os.listdir(os.getcwd() + '/Data/Feedback/Images/')
+                    files = [f for f in files if not f.startswith('.')]
+                    files = [int(f.split('.')[0]) for f in files]
+                    new_file = str(max(files)+1) + '.jpg'
+                except:
+                    new_file = '0.jpg'
+                img = Image.open(io.BytesIO(session_state.uploaded_image))
+                img.save(f'Data/Feedback/Images/{new_file}')
+                new_caption = pd.DataFrame({'PATH': [new_file], 'CAPTION': session_state.correct_class})
+                try:
+                    caps = pd.read_csv('Data/Feedback/Captions/captions.csv')
+                    caps = pd.concat([caps, new_caption], axis=0).reset_index(drop=True)
+                    caps.to_csv('Data/Feedback/Captions/captions.csv', index=False)
+                except:
+                    new_caption.to_csv('Data/Feedback/Captions/captions.csv', index=False)
+                st.write("Thank you for that, we'll use your help to make our model better!")
+                # Log prediction information to terminal (this could be stored in Big Query or something like that)
 
             
        
@@ -103,7 +110,3 @@ elif value == 'Random':
         st.write(f"The prediction via random selection for this caption is: __{val}.__")
 else:
     st.write('There was some error in prediction type!')
-    
-
-            
-

@@ -12,7 +12,7 @@ import os
 ### Atributes 
 
 # Parameters
-with open('Data/Objects/parameters.json') as json_file:
+with open('Data/Objects/parameters_type_0.json') as json_file:
     parameters = json.load(json_file)
 
 max_length = parameters['MAX_LENGTH']
@@ -20,6 +20,8 @@ attention_features_shape = parameters['ATTENTION_FEATURES_SHAPE']
 vocab_size = parameters['VOCAB_SIZE']
 units = parameters['UNITS']
 embedding_dim = parameters['EMBEDDING_DIMENSION']
+
+# Information model
 
 ### Classes
 
@@ -148,8 +150,8 @@ def image_to_v3_format(image_path):
     return img, image_path
 
 ### Predictions
-#@
-#st.cache # Not working
+
+#@st.cache # Not working
 def evaluate(image):
     attention_plot = np.zeros((max_length, attention_features_shape))
 
@@ -175,13 +177,15 @@ def evaluate(image):
         result.append(tokenizer.index_word[predicted_id])
 
         if tokenizer.index_word[predicted_id] == '<end>':
+            result[0] = result[0].title()
             return  ' '.join(result[:-1]), attention_plot
 
         dec_input = tf.expand_dims([predicted_id], 0)
 
     attention_plot = attention_plot[:len(result), :]
-    return result, attention_plot
-
+    result[0] = result[0].title()
+    return ' '.join(result[:-1]), attention_plot
+#@st.cache # Not working
 def prob_evaluate(image):
     attention_plot = np.zeros((max_length, attention_features_shape))
 
@@ -207,10 +211,12 @@ def prob_evaluate(image):
         result.append(tokenizer.index_word[predicted_id])
 
         if tokenizer.index_word[predicted_id] == '<end>':
+            result[0] = result[0].title()
             return  ' '.join(result[:-1]), attention_plot
 
         dec_input = tf.expand_dims([predicted_id], 0)
 
     attention_plot = attention_plot[:len(result), :]
-    return result, attention_plot
+    result[0] = result[0].title()
+    return ' '.join(result[:-1]), attention_plot
 

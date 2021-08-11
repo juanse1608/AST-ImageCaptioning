@@ -219,4 +219,3 @@ def prob_evaluate(image):
     attention_plot = attention_plot[:len(result), :]
     result[0] = result[0].title()
     return ' '.join(result[:-1]), attention_plot
-

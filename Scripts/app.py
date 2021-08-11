@@ -1,5 +1,6 @@
 # Import libreries
 import streamlit as st
+from streamlit.server.server import SessionInfo
 from predictions_type_0 import evaluate, prob_evaluate
 import session_state
 import json

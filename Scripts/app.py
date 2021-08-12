@@ -15,10 +15,14 @@ from google.cloud import storage, bigquery
 cloud_feedback = True
 try:
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'GOOGLE_ACC_CREDENTIALS.json'
+    storage_cl = storage.Client()
+    bigq_cl = bigquery.Client()
 except:
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = st.secrets["GOOGLE_ACC_CREDENTIALS"]
-storage_cl = storage.Client()
-bigq_cl = bigquery.Client()
+    creds = st.secrets["GOOGLE_ACC_CREDENTIALS"]
+    storage_cl = storage.Client(credentials=creds)
+    bigq_cl = bigquery.Client(credentials=creds)
+
+
 bucket_name = 'img-captioning-feedback'
 
 # Run the predict page

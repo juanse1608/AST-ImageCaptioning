@@ -36,6 +36,11 @@ We use the framework (or service) [Streamlit](), a tool that allows to deploy an
 
 In order to store the feedback of the users, we use [GCP](cloud.google.com) services: in particular we use BigQuery to store the captions and Storage to store the images.
 
+Example:
+
+https://github.com/juanse1608/AST-ImageCaptioning/blob/main/Data/Examples/Example.mov
+
+
 ### Usage
 
 You can access to the webapp clicking [here](https://share.streamlit.io/juanse1608/ast-imagecaptioning/main/Scripts/app.py) (if the link is broken is probably beacuse the app is not active, so concact me if you want to try it). 

@@ -38,7 +38,7 @@ In order to store the feedback of the users, we use [GCP](cloud.google.com) serv
 
 Example:
 
-![Example](https://user-images.githubusercontent.com/46349219/129263300-ee141788-9b8a-427a-b7cb-b95508b70afd.gif=250x250)
+![Example](https://user-images.githubusercontent.com/46349219/129264122-348a2d4b-dcf7-4601-957d-6ada1140ce0e.gif)
 
 ### Usage
 

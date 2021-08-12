@@ -1,4 +1,5 @@
 # Import libreries
+from google.cloud.bigquery.schema import SchemaField
 import streamlit as st
 from streamlit.server.server import SessionInfo
 from predictions_type_0 import evaluate, prob_evaluate
@@ -10,20 +11,53 @@ import session_info
 import io
 import os
 from google.cloud import storage, bigquery 
+from google.cloud.bigquery.schema import SchemaField
+from google.oauth2 import service_account
 
 # Feedback type
 cloud_feedback = True
-try:
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'GOOGLE_ACC_CREDENTIALS.json'
-    storage_cl = storage.Client()
-    bigq_cl = bigquery.Client()
-except:
-    creds = st.secrets["GOOGLE_ACC_CREDENTIALS"]
-    storage_cl = storage.Client(credentials=creds)
-    bigq_cl = bigquery.Client(credentials=creds)
 
 
 bucket_name = 'img-captioning-feedback'
+@st.cache(hash_funcs={dict: lambda _: None})
+def obtain_bucket(bucket_name):
+    try:
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'GOOGLE_ACC_CREDENTIALS.json'
+        storage_cl = storage.Client()
+        bigq_cl = bigquery.Client()
+    except:
+        creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"])
+        storage_cl = storage.Client(credentials=creds)
+        bigq_cl = bigquery.Client(credentials=creds)
+    
+    return {'BQ_CLIENT': bigq_cl, 'STORAGE_CLIENT': storage_cl}
+gcp_info = obtain_bucket(bucket_name)
+
+
+
+
+# @st.cache(hash_funcs={bigquery.client.Client: lambda _: None, storage.client.Client: lambda _: None})
+def load_image_and_caption(val, uploaded_image):
+    blobs = gcp_info['STORAGE_CLIENT'].list_blobs(bucket_name, prefix='images/', delimiter='/')
+    try: 
+        files = []
+        for f in blobs:
+            f_n = f.name.split('/')[1]
+            try:
+                files.append(int(f_n.split('.')[0]))
+            except:
+                pass
+        new_file = str(max(files)+1) + '.jpg'
+    except:
+        new_file = '0.jpg'
+    img = Image.open(io.BytesIO(uploaded_image))
+    img.save(f'{new_file}')
+    blob = gcp_info['STORAGE_CLIENT'].get_bucket(bucket_name).blob(f'images/{new_file}')
+    blob.upload_from_filename(new_file)
+    os.remove(f'{new_file}')
+    new_caption = pd.DataFrame({'PATH': [new_file], 'CAPTION': val})
+    schema = [SchemaField('PATH', 'STRING'), SchemaField('CAPTION', 'STRING')]
+    gcp_info['BQ_CLIENT'].insert_rows_from_dataframe('img-captioning-322620.feedbacks.CORRECT_CAPTIONS', new_caption, schema)
 
 # Run the predict page
 st.title('Machine Learning Web App - Image Captioning')
@@ -66,50 +100,14 @@ if value == 'Argmax':
         if session_state.feedback == "Select an option":
             pass
         elif session_state.feedback == "Yes":
-            feedback_bucket = storage_cl.get_bucket(bucket_name)
-            blobs = storage_cl.list_blobs(bucket_name, prefix='images/', delimiter='/')
-            try: 
-                files = []
-                for f in blobs:
-                    f_n = f.name.split('/')[1]
-                    try:
-                        files.append(int(f_n.split('.')[0]))
-                    except:
-                        pass
-                new_file = str(max(files)+1) + '.jpg'
-            except:
-                new_file = '0.jpg'
-            img = Image.open(io.BytesIO(session_state.uploaded_image))
-            img.save(f'{new_file}')
-            blob = feedback_bucket.blob(f'images/{new_file}')
-            blob.upload_from_filename(new_file)
-            os.remove(f'{new_file}')
-            new_caption = pd.DataFrame({'PATH': [new_file], 'CAPTION': val})
+            load_image_and_caption(val=val, uploaded_image=session_state.uploaded_image)
             st.write("Thank you for your feedback!")
         elif session_state.feedback == "No":
             session_state.correct_class = st.text_input("What should the correct caption be?")
             if session_state.correct_class:
-                try: 
-                    files = os.listdir(os.getcwd() + '/Data/Feedback/Images/')
-                    files = [f for f in files if not f.startswith('.')]
-                    files = [int(f.split('.')[0]) for f in files]
-                    new_file = str(max(files)+1) + '.jpg'
-                except:
-                    new_file = '0.jpg'
-                img = Image.open(io.BytesIO(session_state.uploaded_image))
-                img.save(f'Data/Feedback/Images/{new_file}')
-                new_caption = pd.DataFrame({'PATH': [new_file], 'CAPTION': session_state.correct_class})
-                try:
-                    caps = pd.read_csv('Data/Feedback/Captions/captions.csv')
-                    caps = pd.concat([caps, new_caption], axis=0).reset_index(drop=True)
-                    caps.to_csv('Data/Feedback/Captions/captions.csv', index=False)
-                except:
-                    new_caption.to_csv('Data/Feedback/Captions/captions.csv', index=False)
+                load_image_and_caption(val=session_state.correct_class, uploaded_image=session_state.uploaded_image)
                 st.write("Thank you for that, we'll use your help to make our model better!")
                 # Log prediction information to terminal (this could be stored in Big Query or something like that)
-        
-        
-
     else:
         if session_state.feedback == "Select an option":
             pass
@@ -153,8 +151,6 @@ if value == 'Argmax':
                 st.write("Thank you for that, we'll use your help to make our model better!")
                 # Log prediction information to terminal (this could be stored in Big Query or something like that)
 
-            
-       
 elif value == 'Random':
     session_state.pred_button = False
     pred_button_new = st.button("Predict")

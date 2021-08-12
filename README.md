@@ -38,7 +38,7 @@ In order to store the feedback of the users, we use [GCP](cloud.google.com) serv
 
 Example:
 
-https://github.com/juanse1608/AST-ImageCaptioning/blob/main/Data/Examples/Example.mov
+https://github.com/juanse1608/AST-ImageCaptioning/blob/main/Data/Examples/Example.gif
 
 
 ### Usage

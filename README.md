@@ -37,9 +37,7 @@ We use the framework (or service) [Streamlit](), a tool that allows to deploy an
 In order to store the feedback of the users, we use [GCP](cloud.google.com) services: in particular we use BigQuery to store the captions and Storage to store the images.
 
 
-<center>
-![Example](https://user-images.githubusercontent.com/46349219/129264122-348a2d4b-dcf7-4601-957d-6ada1140ce0e.gif)
-</center>   
+<center>![Example](https://user-images.githubusercontent.com/46349219/129264122-348a2d4b-dcf7-4601-957d-6ada1140ce0e.gif)</center>   
 
 ### Usage
 

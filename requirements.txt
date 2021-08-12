@@ -5,3 +5,6 @@ streamlit==0.81.0
 Keras-Preprocessing==1.1.2
 numpy==1.19.5
 tensorflow==2.4.1
+google-cloud
+google-cloud-bigquery
+google-cloud-storage

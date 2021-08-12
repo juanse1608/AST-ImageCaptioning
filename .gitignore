@@ -131,3 +131,4 @@ dmypy.json
 Data/Images/*
 Data/Captions/*
 *.DS_Store
+GOOGLE_ACC_CREDENTIALS.json

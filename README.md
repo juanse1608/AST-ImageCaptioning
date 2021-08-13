@@ -23,7 +23,7 @@ We use an encoder-decoder arquitecture where:
 * The encoder is a CNN that transform images into features. We use [InceptionV3](https://arxiv.org/pdf/1512.00567v3.pdf) with the weights [image-net](https://www.image-net.org/) as the CNN encoder, in other words we use transfer learning since we don't unfreeze any layer of it.
 * The decoder is a RNN (a GRU) that attends to the image (or its features) using a Bahdanau attention mecanism and produces a probality distribution for each token of the vocabulary iteratively.  
 
-If you want to understand better our code you can see all the reading, cleaning and training process in out main notebook: [`Notebook/ImageCaptioning.ipynb`](https://github.com/juanse1608/AST-ImageCaptioning/blob/main/Notebooks/ImageCaptioning.ipynb).
+If you want to understand better our code you can see all the reading, cleaning and training process in out main notebook: [`Notebooks/ImageCaptioning.ipynb`](https://github.com/juanse1608/AST-ImageCaptioning/blob/main/Notebooks/ImageCaptioning.ipynb).
 
 ## Webapp via Streamlit
 

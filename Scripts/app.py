@@ -100,12 +100,12 @@ if value == 'Argmax':
         if session_state.feedback == "Select an option":
             pass
         elif session_state.feedback == "Yes":
-            load_image_and_caption(val=val, uploaded_image=session_state.uploaded_image)
+            # load_image_and_caption(val=val, uploaded_image=session_state.uploaded_image)
             st.write("Thank you for your feedback!")
         elif session_state.feedback == "No":
             session_state.correct_class = st.text_input("What should the correct caption be?")
             if session_state.correct_class:
-                load_image_and_caption(val=session_state.correct_class, uploaded_image=session_state.uploaded_image)
+                # load_image_and_caption(val=session_state.correct_class, uploaded_image=session_state.uploaded_image)
                 st.write("Thank you for that, we'll use your help to make our model better!")
                 # Log prediction information to terminal (this could be stored in Big Query or something like that)
     else:
